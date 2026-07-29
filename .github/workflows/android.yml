@@ -19,15 +19,21 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle
 
-    - name: Setup Gradle (Generates wrapper if missing)
+    - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
 
-    - name: Build Debug APK
-      run: gradle assembleDebug
-      # Haddii koodkaagu folder ku dhex jiro, halkan ku dar:
-      # working-directory: ./folder-kaaga
+    - name: Find and Build Gradle Project
+      run: |
+        # Waxay raadinaysaa folder-ka ay ku dhex jiraan settings.gradle ama settings.gradle.kts
+        BUILD_DIR=$(find . -maxdepth 2 -name "settings.gradle*" -exec dirname {} \;)
+        if [ -z "$BUILD_DIR" ]; then
+          echo "Error: No settings.gradle found in repository!"
+          exit 1
+        fi
+        echo "Building in directory: $BUILD_DIR"
+        cd "$BUILD_DIR"
+        gradle assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
